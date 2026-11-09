@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #F1EFE8;
+    color: #17191A;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Brutalist Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F1EFE8;
+    border-left: 1px solid #17191A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #17191A;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #E66A32;
+  }
+
+  /* Brutalist Input Focus */
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    box-shadow: 3px 3px 0px #17191A;
+  }
+}
