@@ -250,11 +250,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       key={r}
                       type="button"
                       onClick={() => setRole(r as PlayingRole)}
-                      className={`py-3 px-4 border-2 border-nearblack font-mono text-xs sm:text-sm font-bold uppercase text-center cursor-pointer transition-all ${
-                        isSelected
+                      className={`py-3 px-4 border-2 border-nearblack font-mono text-xs sm:text-sm font-bold uppercase text-center cursor-pointer transition-all ${isSelected
                           ? 'bg-nearblack text-cream shadow-brutal-sm scale-[1.02]'
                           : 'bg-cream text-nearblack hover:bg-cream-200'
-                      }`}
+                        }`}
                     >
                       {r}
                     </button>

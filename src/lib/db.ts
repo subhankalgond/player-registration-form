@@ -38,16 +38,42 @@ export function generateTournamentSlug(name: string, sport: SportType): string {
   return `${cleanSport}-${cleanName || 'tournament'}-${shortId}`;
 }
 
+function shouldFallbackToLocal(error: any): boolean {
+  if (!error) return false;
+  const msg = String(error.message || '').toLowerCase();
+  const code = String(error.code || '');
+  return (
+    code === 'PGRST205' ||
+    code === '42P01' ||
+    msg.includes('could not find the table') ||
+    msg.includes('relation') ||
+    msg.includes('schema cache') ||
+    msg.includes('failed to fetch')
+  );
+}
+
 export const db = {
   // ================= TOURNAMENTS =================
   async getTournaments(): Promise<Tournament[]> {
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('tournaments')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Tournament[];
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          if (shouldFallbackToLocal(error)) {
+            console.warn('Supabase tournaments table not initialized yet. Using local database storage.');
+          } else {
+            throw error;
+          }
+        } else if (data) {
+          return data as Tournament[];
+        }
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     // Local IndexedDB fallback
@@ -67,14 +93,23 @@ export const db = {
 
   async getTournamentByIdOrSlug(idOrSlug: string): Promise<Tournament | null> {
     if (isSupabaseConfigured() && supabase) {
-      // Try ID or slug match
-      const { data, error } = await supabase
-        .from('tournaments')
-        .select('*')
-        .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
-        .maybeSingle();
-      if (error && error.code !== 'PGRST116') throw error;
-      return (data as Tournament) || null;
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('*')
+          .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+          .maybeSingle();
+
+        if (error) {
+          if (!shouldFallbackToLocal(error) && error.code !== 'PGRST116') {
+            throw error;
+          }
+        } else if (data) {
+          return data as Tournament;
+        }
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const tournaments = await this.getTournaments();
@@ -95,15 +130,25 @@ export const db = {
     };
 
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('tournaments')
-        .insert([newTournament])
-        .select()
-        .single();
-      if (error) throw error;
-      return data as Tournament;
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .insert([newTournament])
+          .select()
+          .single();
+
+        if (!error && data) {
+          return data as Tournament;
+        }
+        if (error && !shouldFallbackToLocal(error)) {
+          throw error;
+        }
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
+    // Local IndexedDB fallback
     const idb = await openIndexedDB();
     return new Promise((resolve, reject) => {
       const tx = idb.transaction(STORE_TOURNAMENTS, 'readwrite');
@@ -116,12 +161,17 @@ export const db = {
 
   async updateTournamentStatus(id: string, status: Tournament['registration_status']): Promise<void> {
     if (isSupabaseConfigured() && supabase) {
-      const { error } = await supabase
-        .from('tournaments')
-        .update({ registration_status: status })
-        .eq('id', id);
-      if (error) throw error;
-      return;
+      try {
+        const { error } = await supabase
+          .from('tournaments')
+          .update({ registration_status: status })
+          .eq('id', id);
+
+        if (!error) return;
+        if (error && !shouldFallbackToLocal(error)) throw error;
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const idb = await openIndexedDB();
@@ -143,13 +193,18 @@ export const db = {
   // ================= PLAYERS =================
   async getPlayersByTournament(tournamentId: string): Promise<Player[]> {
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .eq('tournament_id', tournamentId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Player[];
+      try {
+        const { data, error } = await supabase
+          .from('players')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) return data as Player[];
+        if (error && !shouldFallbackToLocal(error)) throw error;
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const idb = await openIndexedDB();
@@ -169,12 +224,17 @@ export const db = {
 
   async getAllPlayers(): Promise<Player[]> {
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as Player[];
+      try {
+        const { data, error } = await supabase
+          .from('players')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) return data as Player[];
+        if (error && !shouldFallbackToLocal(error)) throw error;
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const idb = await openIndexedDB();
@@ -190,14 +250,21 @@ export const db = {
   async checkDuplicateUSN(tournamentId: string, usn: string): Promise<boolean> {
     const formattedUsn = usn.trim().toUpperCase();
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('players')
-        .select('id')
-        .eq('tournament_id', tournamentId)
-        .ilike('usn', formattedUsn)
-        .maybeSingle();
-      if (error && error.code !== 'PGRST116') throw error;
-      return Boolean(data);
+      try {
+        const { data, error } = await supabase
+          .from('players')
+          .select('id')
+          .eq('tournament_id', tournamentId)
+          .ilike('usn', formattedUsn)
+          .maybeSingle();
+
+        if (!error && data) return true;
+        if (error && !shouldFallbackToLocal(error) && error.code !== 'PGRST116') {
+          throw error;
+        }
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const players = await this.getPlayersByTournament(tournamentId);
@@ -227,21 +294,64 @@ export const db = {
       throw new Error(`A player with USN "${playerData.usn.trim().toUpperCase()}" is already registered for this tournament.`);
     }
 
+    const playerId = crypto.randomUUID ? crypto.randomUUID() : 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Upload photo to Supabase storage if available, otherwise retain base64
+    let finalPhotoUrl = playerData.profile_image_url;
+    if (isSupabaseConfigured() && supabase && finalPhotoUrl.startsWith('data:image/')) {
+      try {
+        const matches = finalPhotoUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const mimeType = matches[1];
+          const byteCharacters = atob(matches[2]);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType });
+          const ext = mimeType.split('/')[1] || 'png';
+          const filePath = `${playerId}_${Date.now()}.${ext}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('player-photos')
+            .upload(filePath, blob, { contentType: mimeType, upsert: true });
+
+          if (!uploadError) {
+            const { data: publicUrlData } = supabase.storage
+              .from('player-photos')
+              .getPublicUrl(filePath);
+            if (publicUrlData?.publicUrl) {
+              finalPhotoUrl = publicUrlData.publicUrl;
+            }
+          }
+        }
+      } catch (uploadErr) {
+        console.warn('Storage upload fallback:', uploadErr);
+      }
+    }
+
     const newPlayer: Player = {
       ...playerData,
+      profile_image_url: finalPhotoUrl,
       usn: playerData.usn.trim().toUpperCase(),
-      id: crypto.randomUUID ? crypto.randomUUID() : 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      id: playerId,
       created_at: new Date().toISOString(),
     };
 
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase
-        .from('players')
-        .insert([newPlayer])
-        .select()
-        .single();
-      if (error) throw error;
-      return data as Player;
+      try {
+        const { data, error } = await supabase
+          .from('players')
+          .insert([newPlayer])
+          .select()
+          .single();
+
+        if (!error && data) return data as Player;
+        if (error && !shouldFallbackToLocal(error)) throw error;
+      } catch (err: any) {
+        if (!shouldFallbackToLocal(err)) throw err;
+      }
     }
 
     const idb = await openIndexedDB();
@@ -283,4 +393,3 @@ export const db = {
     };
   },
 };
-
