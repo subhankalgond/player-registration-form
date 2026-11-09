@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BrutalButton } from '../components/common/BrutalButton';
-import { IconLock, IconShield, IconArrowLeft } from '../components/common/Icons';
+import { IconLock, IconArrowLeft } from '../components/common/Icons';
 import { useToast } from '../components/common/Toast';
 
 export const LoginPage: React.FC = () => {
@@ -10,26 +10,31 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const [email, setEmail] = useState('organizer@arena.edu');
-  const [password, setPassword] = useState('Admin@123');
+  const [passkey, setPasskey] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+
+    if (!passkey.trim()) {
+      setErrorMessage('Please enter the organizer passkey.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await login(email, password);
+      const res = await login(passkey);
       if (res.success) {
-        showToast('Authorized organizer login successful!', 'success');
+        showToast('Organizer authenticated successfully!', 'success');
         navigate('/organizer');
       } else {
-        setErrorMessage(res.error || 'Authentication failed. Please verify credentials.');
+        setErrorMessage(res.error || 'Invalid passkey. Access denied.');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Login failed.');
+      setErrorMessage(err.message || 'Authentication failed.');
     } finally {
       setLoading(false);
     }
@@ -75,32 +80,19 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-nearblack mb-1.5">
-                ORGANIZER EMAIL
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="organizer@arena.edu"
-                className="w-full px-4 py-2.5 bg-cream border-2 border-nearblack font-sans text-sm text-nearblack placeholder:text-nearblack/40 focus:outline-none focus:bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-nearblack mb-1.5">
-                PASSWORD
+              <label className="block font-mono text-xs font-bold uppercase tracking-wider text-nearblack mb-2">
+                ORGANIZER PASSKEY
               </label>
               <input
                 type="password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 bg-cream border-2 border-nearblack font-mono text-sm text-nearblack placeholder:text-nearblack/40 focus:outline-none focus:bg-white"
+                autoFocus
+                value={passkey}
+                onChange={(e) => setPasskey(e.target.value)}
+                placeholder="ENTER PASSKEY..."
+                className="w-full px-4 py-3 bg-cream border-2 border-nearblack font-mono text-base uppercase tracking-widest text-nearblack placeholder:text-nearblack/40 focus:outline-none focus:bg-white"
               />
             </div>
 
@@ -112,26 +104,16 @@ export const LoginPage: React.FC = () => {
                 fullWidth
                 disabled={loading}
               >
-                {loading ? 'AUTHENTICATING...' : 'LOG IN TO DASHBOARD'}
+                {loading ? 'VERIFYING PASSKEY...' : 'LOG IN TO DASHBOARD'}
               </BrutalButton>
             </div>
           </form>
-
-          {/* Organizer Credentials Hint */}
-          <div className="mt-6 pt-4 border-t-2 border-nearblack/10 bg-cream p-3 border border-nearblack font-mono text-[11px] text-nearblack/80 space-y-1">
-            <div className="flex items-center gap-1 font-bold text-nearblack">
-              <IconShield className="w-3.5 h-3.5 text-orange-accent" />
-              <span>DEFAULT AUTHORIZED ORGANIZER CREDENTIALS:</span>
-            </div>
-            <div>Email: <span className="font-bold text-nearblack">organizer@arena.edu</span></div>
-            <div>Password: <span className="font-bold text-nearblack">Admin@123</span></div>
-          </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t-2 border-nearblack p-4 text-center font-mono text-xs text-nearblack/60">
-        NO PUBLIC REGISTRATION ALLOWED • ORGANIZER ACCOUNTS ONLY
+        ORGANIZER AUTHORIZATION ONLY • STRICT PASSKEY ENFORCEMENT
       </footer>
     </div>
   );

@@ -60,3 +60,4 @@ export async function downloadAllPlayerCardsZIP(
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+

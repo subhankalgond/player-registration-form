@@ -157,3 +157,4 @@ export const PlayerCardPreviewModal: React.FC<PlayerCardPreviewModalProps> = ({
     </div>
   );
 };
+

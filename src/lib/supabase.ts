@@ -15,3 +15,4 @@ export const isSupabaseConfigured = (): boolean => {
 export const supabase = isSupabaseConfigured()
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
+

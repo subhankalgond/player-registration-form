@@ -333,3 +333,4 @@ export const PlayerManagementTable: React.FC<PlayerManagementTableProps> = ({
     </div>
   );
 };
+

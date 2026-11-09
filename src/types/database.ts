@@ -53,3 +53,4 @@ export const SPORT_ROLES: Record<SportType, readonly string[]> = {
   Volleyball: ['Setter', 'Spiker', 'Libero', 'Blocker', 'All-rounder'],
   Kabaddi: ['Raider', 'Defender', 'All-rounder'],
 } as const;
+

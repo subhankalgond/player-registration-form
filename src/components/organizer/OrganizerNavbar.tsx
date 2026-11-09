@@ -58,3 +58,4 @@ export const OrganizerNavbar: React.FC = () => {
     </header>
   );
 };
+

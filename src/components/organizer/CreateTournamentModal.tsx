@@ -233,3 +233,4 @@ export const CreateTournamentModal: React.FC<CreateTournamentModalProps> = ({
     </div>
   );
 };
+

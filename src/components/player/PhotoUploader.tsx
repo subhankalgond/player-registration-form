@@ -165,3 +165,4 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     </div>
   );
 };
+

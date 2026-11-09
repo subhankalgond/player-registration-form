@@ -251,3 +251,4 @@ export const TournamentList: React.FC<TournamentListProps> = ({ tournaments, onR
     </div>
   );
 };
+

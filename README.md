@@ -11,7 +11,7 @@ A high-performance, modern brutalist sports tournament registration and auction 
 The platform strictly separates the two user personas:
 
 ### 1. Organizer (Admin Portal)
-- **Secure Authentication**: Protected dashboard via email/password (`organizer@arena.edu` / `Admin@123`).
+- **Secure Authentication**: Protected dashboard via organizer passkey (`2AB24CD028`).
 - **Tournament Creation**:
   - Configure tournament name, sport (**Cricket**, **Volleyball**, or **Kabaddi**), tournament date, registration deadline, location, and description.
   - Generates zero-collision unique public registration links (e.g. `/register/cricket-inter-collegiate-2026-x9z2`).
@@ -131,6 +131,6 @@ npm run build
 npm run preview
 ```
 
-### Default Organizer Login:
-- **Email**: `organizer@arena.edu`
-- **Password**: `Admin@123`
+### Organizer Access Passkey:
+- **Passkey**: `2AB24CD028`
+

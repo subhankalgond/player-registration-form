@@ -284,3 +284,4 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     </div>
   );
 };
+

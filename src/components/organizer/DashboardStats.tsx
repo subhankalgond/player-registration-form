@@ -78,3 +78,4 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
     </div>
   );
 };
+

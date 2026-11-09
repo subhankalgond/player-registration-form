@@ -106,3 +106,4 @@ export const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
     </div>
   );
 };
+

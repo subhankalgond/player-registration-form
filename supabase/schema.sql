@@ -111,3 +111,4 @@ CREATE POLICY "Users can view their own profile"
 -- INSERT INTO storage.buckets (id, name, public) VALUES ('player-photos', 'player-photos', true) ON CONFLICT DO NOTHING;
 -- CREATE POLICY "Public can upload photos" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'player-photos');
 -- CREATE POLICY "Public can view photos" ON storage.objects FOR SELECT USING (bucket_id = 'player-photos');
+

@@ -173,3 +173,4 @@ export const IconLogout: React.FC<IconProps> = ({ className = "w-5 h-5", size = 
     <line x1="21" y1="12" x2="9" y2="12" />
   </svg>
 );
+
