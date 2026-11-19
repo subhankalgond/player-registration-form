@@ -24,8 +24,8 @@ The platform strictly separates the two user personas:
   - **Download Player Card**: Direct 1080×1350 high-resolution PNG export.
   - **Download All Player Cards**: Batch generates all registered players in the tournament into an organized `.zip` file with real-time packaging progress.
 
-### 2. Player (Public Self-Registration)
-- **Zero-Login Frictionless Intake**: Players open the tournament registration link.
+### 2. Player      (Public Self-Registration)
+- **Zero-Login Frictionless Intake**: Players    open the tournament registration link.
 - **Automatic Sport Recognition**: The form identifies the sport from the URL and presents *only* the relevant roles (Cricket, Volleyball, or Kabaddi). No sport re-selection.
 - **Five Mandatory Fields**:
   1. **Player Photograph** (JPG, PNG, WEBP with diamond alignment preview, replace/remove action, and file validation).
